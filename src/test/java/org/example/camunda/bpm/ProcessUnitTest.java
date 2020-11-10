@@ -2,9 +2,9 @@ package org.example.camunda.bpm;
 
 import org.apache.ibatis.logging.LogFactory;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
+import org.camunda.bpm.engine.test.Deployment;
 import org.camunda.bpm.engine.test.ProcessEngineRule;
 import org.camunda.bpm.extension.process_test_coverage.junit.rules.TestCoverageProcessEngineRuleBuilder;
-import org.camunda.bpm.engine.test.Deployment;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -18,15 +18,15 @@ import static org.junit.Assert.*;
  */
 public class ProcessUnitTest {
 
+  static {
+    LogFactory.useSlf4jLogging(); // MyBatis
+  }
+
   @ClassRule
   @Rule
   public static ProcessEngineRule rule = TestCoverageProcessEngineRuleBuilder.create().build();
 
   private static final String PROCESS_DEFINITION_KEY = "camunda-process-engine-plugin";
-
-  static {
-    LogFactory.useSlf4jLogging(); // MyBatis
-  }
 
   @Before
   public void setup() {
@@ -36,13 +36,16 @@ public class ProcessUnitTest {
   @Test
   @Deployment(resources = "process.bpmn")
   public void testHappyPath() {
-	  ProcessInstance processInstance = processEngine().getRuntimeService().startProcessInstanceByKey(PROCESS_DEFINITION_KEY);
+    // Drive the process by API and assert correct behavior by camunda-bpm-assert
 
-	  assertThat(processInstance).task("Task_DoSomething");
-	  
-	  complete(task());
-	  
-	  assertThat(processInstance).isEnded();
+    ProcessInstance processInstance = processEngine().getRuntimeService()
+        .startProcessInstanceByKey(PROCESS_DEFINITION_KEY);
+
+    assertThat(processInstance).task("Task_DoSomething");
+
+	complete(task());
+
+	assertThat(processInstance).isEnded();
   }
 
 }
